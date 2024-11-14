@@ -1,10 +1,10 @@
 require("dotenv").config();
 export default {
-  async fetch(request) {
-    const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
-    const AZURE_STORAGE_ACCOUNT_NAME = process.env.AZURE_STORAGE_ACCOUNT_NAME;
-    const AZURE_STORAGE_ACCOUNT_KEY = process.env.AZURE_STORAGE_ACCOUNT_KEY;
-    const AZURE_CONTAINER_NAME = process.env.AZURE_CONTAINER_NAME;
+  async fetch(request, env) {
+    const ALLOWED_ORIGIN = env.ALLOWED_ORIGIN;
+    const AZURE_STORAGE_ACCOUNT_NAME = env.AZURE_STORAGE_ACCOUNT_NAME;
+    const AZURE_STORAGE_ACCOUNT_KEY = env.AZURE_STORAGE_ACCOUNT_KEY;
+    const AZURE_CONTAINER_NAME = env.AZURE_CONTAINER_NAME;
 
     if (request.method === "POST") {
       // Ensure the request has a file
