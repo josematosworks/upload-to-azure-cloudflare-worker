@@ -29,6 +29,11 @@ export default {
       const blobPath = `/${AZURE_CONTAINER_NAME}/${file.name}`;
       const date = new Date().toUTCString();
 
+      // Check if the Azure Storage Account Key is provided
+      if (!AZURE_STORAGE_ACCOUNT_KEY) {
+        return new Response("Azure Storage Account Key is not set", { status: 500 });
+      }
+
       const stringToSign = `PUT\n\n\n${file.size}\n\n${file.type}\n\n\n\n\n\n\nx-ms-blob-type:BlockBlob\nx-ms-date:${date}\nx-ms-version:2020-10-02\n/${AZURE_STORAGE_ACCOUNT_NAME}${blobPath}`;
       const signature = await crypto.subtle
         .importKey(
