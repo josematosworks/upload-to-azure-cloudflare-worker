@@ -1,1 +1,0 @@
-# upload-to-azure-cloudflare-worker
