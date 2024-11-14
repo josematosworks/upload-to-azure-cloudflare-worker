@@ -71,11 +71,15 @@ export default {
         body: file.stream(),
       });
 
-      console.log("azureResponse", JSON.stringify(azureResponse));
+      // Add logging for the azureResponse
+      console.log("azureResponse status:", azureResponse.status);
+      console.log("azureResponse statusText:", azureResponse.statusText);
+      const responseBody = await azureResponse.text(); // Capture the response body
+      console.log("azureResponse body:", responseBody);
 
       if (!azureResponse.ok) {
         return new Response(
-          `Failed to upload file to Azure ${JSON.stringify(azureResponse)}`,
+          `Failed to upload file to Azure: ${responseBody}`,
           { status: 500 }
         );
       }
