@@ -5,6 +5,9 @@ export default {
     const AZURE_CONTAINER_NAME = env.AZURE_CONTAINER_NAME;
     const SAS_TOKEN = env.SAS_TOKEN;
 
+    const MAXIMUM_WIDTH = 800; // Set your desired maximum width
+    const IMAGE_QUALITY = 80; // Set your desired image quality (1-100)
+
     if (request.method === "POST") {
       // Ensure the request has a file
       const contentType = request.headers.get("Content-Type") || "";
@@ -45,6 +48,35 @@ export default {
 
       // Prepare the Azure Blob URL with SAS token
       const azureBlobUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${uniqueFileName}?${SAS_TOKEN}`;
+
+      // Function to resize the image
+      const resizeImage = async (file) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        
+        return new Promise((resolve) => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAXIMUM_WIDTH) {
+              height = (height * MAXIMUM_WIDTH) / width;
+              width = MAXIMUM_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => resolve(blob), file.type, IMAGE_QUALITY / 100);
+          };
+        });
+      };
+
+      if (file.type.startsWith("image/")) {
+        file = await resizeImage(file); // Resize and compress the image
+      }
 
       // Send file to Azure Blob Storage without additional authentication headers
       const azureResponse = await fetch(azureBlobUrl, {
