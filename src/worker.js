@@ -19,11 +19,32 @@ export default {
         return new Response("File not provided or invalid", { status: 400 });
       }
 
+      // Function to generate a GUID
+      const generateGuid = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
+      // Function to check if a file exists in Azure Blob Storage
+      const fileExists = async (fileName) => {
+        const azureBlobUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${fileName}`;
+        const response = await fetch(azureBlobUrl, { method: "HEAD" });
+        return response.status === 200; // Returns true if the file exists
+      };
+
       // Encode the file name to handle special characters
-      const encodedFileName = encodeURIComponent(file.name);
+      const originalFileName = file.name;
+      const fileExtension = originalFileName.split('.').pop(); // Get the file extension
+      let uniqueFileName;
+
+      do {
+        uniqueFileName = `${generateGuid()}.${fileExtension}`; // Generate a unique file name
+      } while (await fileExists(uniqueFileName)); // Check if the file already exists
 
       // Prepare the Azure Blob URL with SAS token
-      const azureBlobUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${encodedFileName}?${SAS_TOKEN}`;
+      const azureBlobUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${uniqueFileName}?${SAS_TOKEN}`;
 
       // Send file to Azure Blob Storage without additional authentication headers
       const azureResponse = await fetch(azureBlobUrl, {
@@ -48,7 +69,7 @@ export default {
       }
 
       // Return the public URL of the uploaded file
-      const publicUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${encodedFileName}`;
+      const publicUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${uniqueFileName}`;
       return new Response(JSON.stringify({ url: publicUrl }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
