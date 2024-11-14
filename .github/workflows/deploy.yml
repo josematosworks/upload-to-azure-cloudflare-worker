@@ -30,7 +30,10 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           secrets: |
-            RESEND_API_KEY
+            AZURE_STORAGE_ACCOUNT_NAME
+            AZURE_STORAGE_ACCOUNT_KEY
+            AZURE_CONTAINER_NAME
+            ALLOWED_ORIGIN
         env:
           AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
