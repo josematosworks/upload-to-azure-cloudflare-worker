@@ -1,4 +1,3 @@
-require("dotenv").config();
 export default {
   async fetch(request, env) {
     const ALLOWED_ORIGIN = env.ALLOWED_ORIGIN;
@@ -72,8 +71,13 @@ export default {
         body: file.stream(),
       });
 
+      console.log("azureResponse", JSON.stringify(azureResponse));
+
       if (!azureResponse.ok) {
-        return new Response("Failed to upload file to Azure", { status: 500 });
+        return new Response(
+          `Failed to upload file to Azure ${JSON.stringify(azureResponse)}`,
+          { status: 500 }
+        );
       }
 
       // Return the public URL
