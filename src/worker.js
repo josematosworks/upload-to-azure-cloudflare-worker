@@ -17,7 +17,7 @@ export default {
 
       // Extract the file from the form data
       const formData = await request.formData();
-      const file = formData.get("file"); // "file" is the field name in the form
+      let file = formData.get("file"); // "file" is the field name in the form
       if (!file || !file.name || !file.stream) {
         return new Response("File not provided or invalid", { status: 400 });
       }
