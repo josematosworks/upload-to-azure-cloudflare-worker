@@ -94,9 +94,14 @@ export default {
         });
       }
 
-      // Return the public URL of the uploaded file
+      // Return the public URL and file information
       const publicUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${uniqueFileName}`;
-      return new Response(JSON.stringify({ url: publicUrl }), {
+      return new Response(JSON.stringify({
+        url: publicUrl,
+        filename: originalFileName,
+        type: file.type || "application/octet-stream",
+        size: file.size
+      }), {
         status: 200,
         headers: {
           ...corsHeaders,
