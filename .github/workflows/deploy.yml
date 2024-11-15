@@ -33,9 +33,9 @@ jobs:
             AZURE_STORAGE_ACCOUNT_NAME
             SAS_TOKEN
             AZURE_CONTAINER_NAME
-            ALLOWED_ORIGIN
+            ALLOWED_ORIGINS
         env:
           AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           SAS_TOKEN: ${{ secrets.SAS_TOKEN }}
           AZURE_CONTAINER_NAME: ${{ secrets.AZURE_CONTAINER_NAME }}
-          ALLOWED_ORIGIN: ${{ secrets.ALLOWED_ORIGIN }}
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}

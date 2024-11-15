@@ -1,9 +1,15 @@
 export default {
   async fetch(request, env) {
-    const ALLOWED_ORIGIN = env.ALLOWED_ORIGIN;
+    const ALLOWED_ORIGINS = env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(';') : null;
     const AZURE_STORAGE_ACCOUNT_NAME = env.AZURE_STORAGE_ACCOUNT_NAME;
     const AZURE_CONTAINER_NAME = env.AZURE_CONTAINER_NAME;
     const SAS_TOKEN = env.SAS_TOKEN;
+
+    // Check if the request's origin is allowed
+    const origin = request.headers.get("Origin");
+    if (ALLOWED_ORIGINS && !ALLOWED_ORIGINS.includes(origin)) {
+      return new Response("Origin not allowed", { status: 403 });
+    }
 
     if (request.method === "POST") {
       // Ensure the request has a file
