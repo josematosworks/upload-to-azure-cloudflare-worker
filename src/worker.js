@@ -7,8 +7,28 @@ export default {
 
     // Check if the request's origin is allowed
     const origin = request.headers.get("Origin");
+    
+    // Create common CORS headers
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": ALLOWED_ORIGINS ? (ALLOWED_ORIGINS.includes(origin) ? origin : null) : "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
+
+    // Handle preflight requests
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: corsHeaders,
+        status: 204,
+      });
+    }
+
+    // For forbidden origins, return 403 with CORS headers
     if (ALLOWED_ORIGINS && !ALLOWED_ORIGINS.includes(origin)) {
-      return new Response("Origin not allowed", { status: 403 });
+      return new Response("Origin not allowed", { 
+        status: 403,
+        headers: corsHeaders
+      });
     }
 
     if (request.method === "POST") {
@@ -78,11 +98,17 @@ export default {
       const publicUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${uniqueFileName}`;
       return new Response(JSON.stringify({ url: publicUrl }), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        },
       });
     }
 
-    // Default response for non-POST requests
-    return new Response("Only POST requests are allowed", { status: 405 });
+    // Update the default response to include CORS headers
+    return new Response("Only POST requests are allowed", { 
+      status: 405,
+      headers: corsHeaders
+    });
   },
 };
