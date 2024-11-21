@@ -11,7 +11,7 @@ export default {
     // Create common CORS headers
     const corsHeaders = {
       "Access-Control-Allow-Origin": ALLOWED_ORIGINS ? (ALLOWED_ORIGINS.includes(origin) ? origin : null) : "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "POST, OPTIONS, DELETE",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
@@ -108,6 +108,65 @@ export default {
           "Content-Type": "application/json"
         },
       });
+    }
+
+    // Add DELETE endpoint handler
+    if (request.method === "DELETE") {
+      const url = new URL(request.url);
+      if (url.pathname !== '/delete') {
+        return new Response("Invalid DELETE endpoint", { 
+          status: 400,
+          headers: corsHeaders
+        });
+      }
+
+      try {
+        // Get the file URL from the request body
+        const { fileUrl } = await request.json();
+        if (!fileUrl) {
+          return new Response("File URL not provided", { 
+            status: 400,
+            headers: corsHeaders
+          });
+        }
+
+        // Extract filename from the URL
+        const urlObj = new URL(fileUrl);
+        const filename = urlObj.pathname.split('/').pop();
+
+        // Construct the Azure delete URL with SAS token
+        const deleteUrl = `https://${AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${filename}?${SAS_TOKEN}`;
+
+        // Send delete request to Azure
+        const deleteResponse = await fetch(deleteUrl, {
+          method: "DELETE",
+        });
+
+        if (!deleteResponse.ok) {
+          const errorText = await deleteResponse.text();
+          return new Response(`Failed to delete file: ${errorText}`, {
+            status: deleteResponse.status,
+            headers: corsHeaders
+          });
+        }
+
+        return new Response(JSON.stringify({
+          message: "File deleted successfully",
+          filename: filename
+        }), {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        });
+
+      } catch (error) {
+        return new Response(`Error processing delete request: ${error.message}`, {
+          status: 500,
+          headers: corsHeaders
+        });
+      }
     }
 
     // Update the default response to include CORS headers
